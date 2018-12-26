@@ -5,4 +5,4 @@ This repository contains (mostly) scripts for normalizing, cleaning and analyzin
 The folders in the repository correspond to the research structure of my thesis. Scripts are categorized in the following folders:
 1. `Subcorpus Creation_(SCC)`   scripts for downloading, harmonizing, cleaning and tokenizing newspaper data.
 2. `Quantative Source Criticism (QSC)`
-3. `Vocabulary Diachronic Change Detection (DCC)`
+3. `Vocabulary Diachronic Change Detection (VCC)`
