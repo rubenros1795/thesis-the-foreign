@@ -13,7 +13,7 @@ from nltk import ngrams
 import multiprocessing
 import time
 
-os.chdir("path")
+os.chdir('C://Users//Ruben//Documents//Scriptie//Data//tng-environment')
 list_csv = glob.glob("*.csv")
 list_csv
 
@@ -33,7 +33,7 @@ def find_ngrams(sentence, n_list):
     return grams
 
 if __name__ == '__main__':
-    p = multiprocessing.Pool(processes = multiprocessing.cpu_count() - 1)
+    p = multiprocessing.Pool(processes = 5)
     #timing it...
     start = time.time()
     for file in list_csv:
