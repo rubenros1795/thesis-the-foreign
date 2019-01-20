@@ -43,7 +43,7 @@ def find_ngrams(sentence, n_list):
 
 
 # Change to Dir of file
-os.chdir("path")
+os.chdir('C://Users//Ruben//Documents//Scriptie//Data//tng-environment')
 list_csv = glob.glob("*.csv")
 list_csv
 
@@ -68,17 +68,15 @@ def PreProcess(filename):
     start_year = int(df.date[0][0:4])
     end_year = int(df.date[len(df)-1][0:4])
     
-    try:
-        aay = len(df) / (end_year - start_year) 
-        if aay < 5000:
-            df.date = df.date.str.slice(0, 4)
-        if aay > 4999:
-            df.date = df.date.str.replace("/", "")
-            df.date = df.date.str.slice(0, 6)
-            print('average number of articles/year = ', str(aay))
-
-    except ZeroDivisionError:
+    aay = len(df) / (end_year - start_year) 
+    if aay < 5000:
         df.date = df.date.str.slice(0, 4)
+        print('tokenizing years')
+
+    if aay > 4999:
+        df.date = df.date.str.replace("/", "")
+        df.date = df.date.str.slice(0, 6)
+        print('tokenizing months')
   
         
         
@@ -86,6 +84,9 @@ def PreProcess(filename):
     for year in sorted(list(set(df.date))):
         df_subset_year = df[df.date == year]
         df_subset_year = df_subset_year.reset_index(drop=True)
+        if len(df_subset_year) < 2:
+            continue
+		
         print(str(year) + " = " + str(len(df_subset_year)) + " articles")
         bigram_df = pd.DataFrame()
         unigram_df = pd.DataFrame()
@@ -108,24 +109,25 @@ def PreProcess(filename):
             list_bigrams = [word for word in list_ngrams if len(word.split(" ")) == 2]
 
         
-            df_unigrams_article = pd.DataFrame(list_unigrams)
-            df_unigrams_article['year'] = year
-            df_unigrams_article['count'] = 1
-            df_unigrams_article.columns = ['ngram', 'year', 'count']
-            unigram_df = unigram_df.append(df_unigrams_article)
+            if len(list_unigrams) > 0:
+                df_unigrams_article = pd.DataFrame(list_unigrams)
+                df_unigrams_article['year'] = year
+                df_unigrams_article['count'] = 1
+                df_unigrams_article.columns = ['ngram', 'year', 'count']
+                unigram_df = unigram_df.append(df_unigrams_article)
             
-            
-            df_bigrams_article = pd.DataFrame(list_bigrams)
-            df_bigrams_article['year'] = year
-            df_bigrams_article['count'] = 1
-            df_bigrams_article.columns = ['ngram', 'year', 'count']
-            bigram_df = bigram_df.append(df_bigrams_article)
-            print(str(i) + "/" + str(len(df_subset_year)) + ": " + df_subset_year.date[i] + " " + df_subset_year.id[i] + " processed")
+            if len(list_bigrams) > 0:
+                df_bigrams_article = pd.DataFrame(list_bigrams)
+                df_bigrams_article['year'] = year
+                df_bigrams_article['count'] = 1
+                df_bigrams_article.columns = ['ngram', 'year', 'count']
+                bigram_df = bigram_df.append(df_bigrams_article)
+            print(str(i) + "/" + str(len(df_subset_year) - 1) + ": " + df_subset_year.date[i] + " " + df_subset_year.id[i] + " processed")
         
         #Write list of senttok articles to one file
         txt_name = filename[0:4] + "_lines_" + str(year) + ".txt"
                         
-        with open(txt_name, 'w') as f:
+        with open(txt_name, 'w', encoding = 'utf-8') as f:
             for item in list_tok_articles_year:
                 f.write("%s\n" % item)
 
@@ -140,6 +142,8 @@ def PreProcess(filename):
         bigram_df = bigram_df.groupby(['ngram', 'year']).sum()
         bigram_df = bigram_df.reset_index()
         bigram_df = bigram_df[bigram_df['count'] > 1]
-        fn = filename[0:4] + "_" + "_bigram_" + str(year) + ".csv"
+        fn = filename[0:4] + "_bigram_" + str(year) + ".csv"
         bigram_df.to_csv(fn, index = False)
 
+for file in list_csv:
+	PreProcess(file)
