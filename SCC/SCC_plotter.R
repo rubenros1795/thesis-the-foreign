@@ -15,11 +15,13 @@ cols <- colorRampPalette(brewer.pal(12, "Set3"))
 myPal <- cols(21)
 ggplot(dfm, aes(x=variable, y=value, fill=npp)) + 
   geom_bar(stat='identity') + 
-  scale_fill_manual(values = myPal) + 
+  scale_fill_manual(values = myPal, name = 'Newspaper Abbreviations') + 
   scale_x_continuous(breaks = round(seq(1815,1914,10),1), expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
-  theme(legend.position = 'bottom', legend.direction = 'horizontal')
-
+  theme(legend.position = 'bottom', legend.direction = 'horizontal') + 
+  ggtitle('Number of Tokens (Newspaper/Year)') +
+  xlab('Year') +
+  ylab('Number of Tokens')
 
 dfss = dfm[dfm$variable < 1877,]
 ggplot(dfss, aes(x=variable, y=value, fill=npp)) + geom_area() + scale_fill_manual(values = myPal) + scale_x_continuous(breaks = round(seq(1815,1914,10),1))
