@@ -39,10 +39,12 @@ tag_f <- function(arg1) {
 
 
 #### IMPORT BIGRAMS FOR EXTRACTION WORDS ####
-df <- read.csv("bigrams_buitenlandsche.csv", sep = ",")
+setwd("~/Scriptie/Data/kwic_dfs")
+df <- read.csv("buitenlandsche_mogendheden_1815_1914_tw_c48d0.csv", sep = ",")
+colnames(df)[1] = 'ngram'
 
 get_words <- function(input_df, how_many_words_a_year, input_model, freq_threshold){
-  
+  input_df[is.na(input_df)] = 0
   input_df$type = ""
   for(i in 1:as.numeric(nrow(input_df))){
         input_df$type[i] <- tag_f(input_df$ngram[i])
@@ -52,9 +54,14 @@ get_words <- function(input_df, how_many_words_a_year, input_model, freq_thresho
   
   total_words <- c()
   
-  for(i in 2:101){
+  for(i in 2:ncol(input_df)){
     tmp <- input_df[order(input_df[,i], decreasing = T),]
     tmp <- tmp[tmp[,i] > freq_threshold,]
+    
+    if(nrow(tmp) < how_many_words_a_year){
+      how_many_words_a_year = as.numeric(nrow(tmp))
+    }
+    
     tmp <- as.character(tmp$ngram[1:how_many_words_a_year])
     total_words <- c(total_words, tmp)
     total_words <- unique(total_words)
@@ -73,11 +80,7 @@ get_words <- function(input_df, how_many_words_a_year, input_model, freq_thresho
   list_words
   
 } 
-
-# input_df is df, pos_tag_select_nouns is "yes" or "no" 
-# how_many_words_a_year is numerical and input_model is used to check if word is actually in model
-
-list_words <- get_words(df, 50, model,5)
+list_words <- get_words(df, 50, model,2)
 
 #### GET DISTANCE MATRIX ###
 get_distance_matrix <- function(list_of_words, input_model){

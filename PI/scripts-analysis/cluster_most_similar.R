@@ -6,6 +6,7 @@ library(ggplot2)
 library(udpipe)
 library(stringr)
 library(reshape2)
+library(RColorBrewer)
 
 
 setwd("~/GitHub/TheForeign/SCC/output-data")
@@ -81,6 +82,6 @@ ggplot(ss, aes(year, value, fill = variable)) + geom_area() +
 } #input_df must be a file name: "total-en-bigrams.csv" or "total-ne-bigrams.csv"
 
 
-tfd("handel", "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
+tfd("overheid", "bigrams_internationale.csv", 1815, 1915, w2v_model)
 
 
