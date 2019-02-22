@@ -13,18 +13,13 @@ library(RColorBrewer)
 library(gridExtra)
 
 
-
-#### CHOOSE LANGUAGE ###
-language_c = "dutch" # dutch or english
-
 #### IMPORT VECTOR SPACE MODEL ###
 setwd("~/GitHub/TheForeign/SCC/output-data") #setwd("~/path/to/models") 
 
 model <- read.vectors("model-whole.bin") #model <- read.vectors("model-english.bin")
 
-
 #### IMPORT POS TAGGER ###
-dl <- udpipe_download_model(language = language_c)
+dl <- udpipe_download_model(language = 'dutch')
 udmodel_l <- udpipe_load_model(file = dl$file_model)
 
 tag_f <- function(arg1) {
@@ -36,33 +31,28 @@ tag_f <- function(arg1) {
 
 
 
-
-
 #### IMPORT BIGRAMS FOR EXTRACTION WORDS ####
 setwd("~/Scriptie/Data/kwic_dfs")
 df <- read.csv("buitenlandsche_mogendheden_1815_1914_tw_c48d0.csv", sep = ",")
 colnames(df)[1] = 'ngram'
 
-get_words <- function(input_df, how_many_words_a_year, input_model, freq_threshold){
+get_words <- function(input_df, input_model){
   input_df[is.na(input_df)] = 0
   input_df$type = ""
-  for(i in 1:as.numeric(nrow(input_df))){
-        input_df$type[i] <- tag_f(input_df$ngram[i])
-      }
   
-  input_df = input_df[input_df$type == 'NOUN',]
+  for(i in 1:nrow(input_df)){
+    input_df$type[i] = tag_f(input_df$ngram[i])
+  }
+  input_df = input_df[input_df$type == "NOUN",]
   
   total_words <- c()
   
   for(i in 2:ncol(input_df)){
-    tmp <- input_df[order(input_df[,i], decreasing = T),]
-    tmp <- tmp[tmp[,i] > freq_threshold,]
-    
-    if(nrow(tmp) < how_many_words_a_year){
-      how_many_words_a_year = as.numeric(nrow(tmp))
-    }
-    
-    tmp <- as.character(tmp$ngram[1:how_many_words_a_year])
+    tmp = input_df[,c(1,i)]
+    colnames(tmp) = c('ngram', 'freq')
+    tmp <- tmp[tmp$freq > 0,]
+    tmp = tmp[order(tmp$freq, decreasing = T),]
+    tmp <- as.character(tmp$ngram[1:20])
     total_words <- c(total_words, tmp)
     total_words <- unique(total_words)
     
@@ -80,7 +70,8 @@ get_words <- function(input_df, how_many_words_a_year, input_model, freq_thresho
   list_words
   
 } 
-list_words <- get_words(df, 50, model,2)
+list_words <- get_words(df, model)
+
 
 #### GET DISTANCE MATRIX ###
 get_distance_matrix <- function(list_of_words, input_model){
@@ -128,7 +119,7 @@ get_cluster <- function(clusn){
     tmp$name <- rownames(tmp)
     tmp <- melt(tmp, id.vars = "name")
     tmp <- tmp[order(tmp$value, decreasing = T),]
-    tmp <- unique(as.character(tmp$name[1:12]))
+    tmp <- unique(as.character(tmp$name[1:10]))
     tmp <- paste0(tmp, collapse = " | ")
     names_col <- c(names_col, tmp)
   }
@@ -162,41 +153,6 @@ get_cluster <- function(clusn){
   output$value <- as.numeric(output$value)
   
   
-  # Get Distribution within clusters
-  list_of_plots <- list()
-  
-  for(i in seq(1,as.numeric(length(unique(clust$cluster))),1)){
-    tmp <- clust[clust$cluster == i,]
-    tmp <- as.character(tmp$name)
-    tmp <- as.data.frame(df[df$ngram %in% tmp,])
-    cs <- as.data.frame(rowSums(tmp[,c(2:as.numeric(ncol(tmp)))]))
-    cs$words <- tmp$ngram
-    colnames(cs) <- c('rs', "ngram")
-    cs <- cs[order(cs$rs, decreasing = T),]
-    cs$rs <- round((cs$rs / sum(cs$rs) * 100),2)
-    #cs <- as.data.frame(cs[1,])
-    cs$clus <- i
-    
-    cs$bigornot <- ""
-    for(row in 1:as.numeric(nrow(cs))){
-      if(cs$rs[row] > 5){cs$bigornot[row] <- as.character(cs$ngram[row])}
-      else{cs$bigornot[row] <- "small stuff"}
-    }
-    
-    selection_words <- as.character(cs$ngram[cs$rs > 5])
-    #colours <- brewer.pal(as.numeric(length(unique(cs$bigornot))), "Accent")
-    
-    p <- ggplot(cs[order(cs$rs, decreasing = T),], aes(x = clus, y = rs, fill = bigornot)) +
-      geom_col() +
-      #geom_text(aes(clus, rs, label=paste0(bigram, rs)), data = cs[cs$bigram %in% selection_words,]) +
-      theme_minimal(base_size = 16) +
-      ggtitle(paste0("Cluster ", i, " with ", nrow(tmp), " bigrams")) +
-      theme(axis.ticks.x = element_blank()) +
-      guides(fill=guide_legend(title="Words > 5% and Other")) 
-    list_of_plots[[i]] <- p
-  }
-  
-  
   cols <- colorRampPalette(brewer.pal(12, "Set3"))
   myPal <- cols(clusn)
   
@@ -217,22 +173,8 @@ get_cluster <- function(clusn){
     guides(fill=guide_legend(title="Clusters", nrow=clusn,byrow=TRUE))
   
   
-  list_of_plots[[(clusn + 1)]] <- main
-  list_of_plots
-} # outputs a list of plots, the last one is the cluster plot, the other ones are cluster structure plots
+  main
+} 
 
-
-#### PLOT ##
-get_plot <- function(l_plots, main_or_structure){
-  if(main_or_structure == "main"){l_plots[[as.numeric(length(l_plots))]]}
-  if(main_or_structure == "structure"){
-    n <- as.numeric(length(l_plots)) - 1
-    nCol <- floor(sqrt(n))
-    do.call("grid.arrange", c(l_plots[c(1:as.numeric(length(l_plots)) - 1)], ncol=nCol))
-  }
-}
-
-
-list_plots <- get_cluster(16)
-get_plot(list_plots, "main")
+get_cluster(12)
 
