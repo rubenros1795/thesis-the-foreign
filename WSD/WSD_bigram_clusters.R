@@ -119,7 +119,7 @@ get_cluster <- function(clusn){
     tmp$name <- rownames(tmp)
     tmp <- melt(tmp, id.vars = "name")
     tmp <- tmp[order(tmp$value, decreasing = T),]
-    tmp <- unique(as.character(tmp$name[1:10]))
+    tmp <- unique(as.character(tmp$name[1:15]))
     tmp <- paste0(tmp, collapse = " | ")
     names_col <- c(names_col, tmp)
   }

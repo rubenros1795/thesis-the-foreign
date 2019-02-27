@@ -82,6 +82,56 @@ ggplot(ss, aes(year, value, fill = variable)) + geom_area() +
 } #input_df must be a file name: "total-en-bigrams.csv" or "total-ne-bigrams.csv"
 
 
-tfd("overheid", "bigrams_internationale.csv", 1815, 1915, w2v_model)
+tfd("afnemers", "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
+
+##### CUSTOM WORDS
+
+tfdv <- function(input_vector,input_df, s_year, e_year, model){
+  df <- read.csv(input_df, sep = ",")
+  df[is.na(df)] <- 0
+  
+  totals = as.data.frame(colSums(df[,c(2:as.numeric(ncol(df)))]))
+  totals$year = as.numeric(gsub("X","", rownames(totals)))
+  colnames(totals) = c("total", "year")
+  
+  ss <- df[df[,1] %in% input_vector,]
+  words <- as.character(ss$ngram)
+  
+  ss <- setNames(data.frame(t(ss[,-1])), ss[,1])
+  ss$year <- totals$year
+  
+  for(i in 1:as.numeric(ncol(ss) - 1)){
+    ss[,i] = ss[,i] / totals$total * 100
+  }
+  
+  ss <- melt(ss, id.vars = "year")
+  ss[is.na(ss)] <- 0
+  ss$value <- as.numeric(ss$value)
+  ss <- ss[ss$year >= s_year & ss$year <= e_year,]
+  
+  
+  graph_max <- as.numeric(max(ss$value))
+  
+  cols <- colorRampPalette(brewer.pal(12, "Set3"))
+  myPal <- cols(as.numeric(length(unique(ss$variable))))
+  
+  ggplot(ss, aes(year, value, fill = variable)) + geom_area() + 
+    xlab('years') +
+    ylab('Relative Frequency (compared to all bigrams in that year)') +
+    #ggtitle(paste0("Combined Relative Frequency of Words Most Similar to: ", input)) +
+    guides(fill=guide_legend(title="Words")) +
+    scale_x_continuous(expand = c(0,0), limits = c(s_year,e_year)) + 
+    scale_y_continuous(expand = c(0,0), limits = c(0,graph_max)) +
+    scale_fill_manual(values = myPal)
+  
+} #input_df must be a file name: "total-en-bigrams.csv" or "total-ne-bigrams.csv"
+
+
+search_ts = c("vorst", "vorsten", "hertog", "hertogen", "prins", "prinsen", "koning", "koningen", "koningin", "koninginen", "keizer", "keizers", "regent", "prinsregenten")
+search_ts2 = c("gezant", "gezanten", "afgevaardigde", "afgevaardigden", "vertegenwoordiger","vertegenwoordigers")
+search_ts3 = c('vraagstukken', 'vraagstuk', 'quaestie', 'aangelegenheid', 'aangelegenheden')
+
+tfdv(c('nationaliteit'), "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
+
 
 
