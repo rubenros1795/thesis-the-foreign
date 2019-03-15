@@ -82,7 +82,7 @@ ggplot(ss, aes(year, value, fill = variable)) + geom_area() +
 } #input_df must be a file name: "total-en-bigrams.csv" or "total-ne-bigrams.csv"
 
 
-tfd("afnemers", "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
+tfd("vreemde", "adjective_distribution_buitenlandsche.csv", 1815, 1915, w2v_model)
 
 ##### CUSTOM WORDS
 
