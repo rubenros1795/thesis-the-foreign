@@ -25,14 +25,14 @@ tag_f <- function(arg1) {
 
 df <- read.csv("bigrams_buitenlandsche.csv", sep = ",")
 
-tfd <- function(input,input_df, s_year, e_year, model){
+tfd <- function(input,input_df, s_year, e_year, model, maxv){
   df <- read.csv(input_df, sep = ",")
   df[is.na(df)] <- 0
   
-  w <- as.character(closest_to(model, input, 20)$word[2:20])
+  w <- as.character(closest_to(model, input, 15)$word[2:15])
 
   for(i in seq(1,19,1)){
-    tmp <- as.character(closest_to(model, w[i], 20)$word[2:20])
+    tmp <- as.character(closest_to(model, w[i], 15)$word[2:15])
     w <- c(w,tmp)
   }
   
@@ -65,8 +65,7 @@ tfd <- function(input,input_df, s_year, e_year, model){
   ss <- ss[ss$year >= s_year & ss$year <= e_year,]
   
   
-  graph_max <- as.numeric(max(ss$value))
-  
+  graph_max <- maxv
   cols <- colorRampPalette(brewer.pal(12, "Set3"))
   myPal <- cols(as.numeric(length(unique(ss$variable))))
   
@@ -82,7 +81,7 @@ ggplot(ss, aes(year, value, fill = variable)) + geom_area() +
 } #input_df must be a file name: "total-en-bigrams.csv" or "total-ne-bigrams.csv"
 
 
-tfd("vreemde", "adjective_distribution_buitenlandsche.csv", 1815, 1915, w2v_model)
+tfd("soorten", "bigrams_vreemde.csv", 1815, 1914, w2v_model, 20)
 
 ##### CUSTOM WORDS
 
@@ -131,7 +130,7 @@ search_ts = c("vorst", "vorsten", "hertog", "hertogen", "prins", "prinsen", "kon
 search_ts2 = c("gezant", "gezanten", "afgevaardigde", "afgevaardigden", "vertegenwoordiger","vertegenwoordigers")
 search_ts3 = c('vraagstukken', 'vraagstuk', 'quaestie', 'aangelegenheid', 'aangelegenheden')
 
-tfdv(c('nationaliteit'), "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
+tfdv(c('landen', 'mogendheden', 'natien'), "bigrams_buitenlandsche.csv", 1815, 1915, w2v_model)
 
 
 
