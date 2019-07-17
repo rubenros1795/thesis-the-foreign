@@ -1,6 +1,6 @@
 # TheForeign // Scripts and Resources for thesis project "The Birth of the Foreign: A Digital Conceptual History of Buitenland in Dutch newspapers 1815-1914"
 
-This repository contains (mostly) scripts for normalizing, cleaning and analyzing newspaper data for my thesis project on the concept of "the foreign" (_het buitenland_). If you use the scripts, please use the following citation:
+This repository contains (mostly) scripts for normalizing, cleaning and analyzing newspaper data for my thesis project on the concept of "the foreign" (_het buitenland_). If you use the scripts for academic research, please use the following citation:
 
 - Ros, R., (2019). Conceptual Vocabularies and Changing Meanings of “Foreign” in Dutch Foreign News (1815-1914). In Proceedings of the Digital Humanities (DH) conference 2019, Utrecht, The Netherlands.
 
